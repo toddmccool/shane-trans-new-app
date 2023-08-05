@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Song Key and Roman Numeral Conversion</title>
+  </head>
+  <body>
+    <h1>Song Key and Roman Numeral Conversion</h1>
+
+    <label for="songChartInput">Enter the song chart:</label><br />
+    <textarea id="songChartInput" rows="10" cols="100"></textarea><br /><br />
+
+    <button onclick="processSongChart()">Process Song Chart</button>
+
+    <p id="keyResult"></p>
+    <p id="convertedChartResult"></p>
+
+    <label for="targetKey">Transpose to:</label>
+    <select id="targetKey">
+      <option value="Ab">Ab</option>
+      <option value="A">A</option>
+      <option value="Bb">Bb</option>
+      <option value="B">B</option>
+      <option value="C">C</option>
+      <option value="Db">Db</option>
+      <option value="D">D</option>
+      <option value="Eb">Eb</option>
+      <option value="E">E</option>
+      <option value="F">F</option>
+      <option value="Gb">Gb</option>
+      <option value="G">G</option>
+    </select>
+
+    <button onclick="transposeSong()">Transpose Song</button>
+
+    <script>
+      let songChartOriginal = "";
+      let songKeyOriginal = "";
+
+      function processSongChart() {
+        const songChart = document.getElementById("songChartInput").value;
+
+        // Extract the key from the line that says "key: "
+        const keyPattern = /key:\s*(\w+)/i;
+        const keyMatch = songChart.match(keyPattern);
+        if (!keyMatch) {
+          document.getElementById("keyResult").innerText = "Key not found.";
+          return;
+        }
+        const songKey = keyMatch[1].toUpperCase();
+
+        // Function to convert a musical note to its Roman numeral representation based on the song key
+        function convertToRoman(note, songKey) {
+          const majorScale = {
+            C: ["C", "D", "E", "F", "G", "A", "B"],
+            Db: ["Db", "Eb", "F", "Gb", "Ab", "Bb", "C"],
+            D: ["D", "E", "F#", "G", "A", "B", "C#"],
+            Eb: ["Eb", "F", "G", "Ab", "Bb", "C", "D"],
+            E: ["E", "F#", "G#", "A", "B", "C#", "D#"],
+            F: ["F", "G", "A", "Bb", "C", "D", "E"],
+            Gb: ["Gb", "Ab", "Bb", "Cb", "Db", "Eb", "F"],
+            G: ["G", "A", "B", "C", "D", "E", "F#"],
+            Ab: ["Ab", "Bb", "C", "Db", "Eb", "F", "G"],
+            A: ["A", "B", "C#", "D", "E", "F#", "G#"],
+            Bb: ["Bb", "C", "D", "Eb", "F", "G", "A"],
+            B: ["B", "C#", "D#", "E", "F#", "G#", "A#"],
+          };
+
+          const keyScale = majorScale[songKey];
+          const noteIndex = keyScale.indexOf(note);
+          if (noteIndex === -1) {
+            return note;
+          }
+          const romanNumerals = ["I", "ii", "iii", "IV", "V", "vi", "vii(dim)"];
+          return romanNumerals[noteIndex];
+        }
+
+        // Replace the musical notes with Roman numerals, excluding lines without dashes and specific words
+        const convertedChart = songChart.replace(
+          /(?<!\w)(A#|Bb|C#|Db|D#|Eb|F#|Gb|G#|[A-G])(\s+|-)/gim,
+          (match, note, dash) => {
+            if (
+              note &&
+              !/\b(Chorus|Bridge|Verse|Intro|Refrain|Instrumental|Tag|Ghost|End)\b/i.test(
+                match
+              )
+            ) {
+              const romanNumeral = convertToRoman(note, songKey);
+              return romanNumeral + dash;
+            }
+            return match;
+          }
+        );
+
+        document.getElementById("keyResult").innerText = `Key: ${songKey}`;
+        document.getElementById("convertedChartResult").innerText =
+          convertedChart;
+
+        // Store the original song chart and key for later transposition
+        songChartOriginal = convertedChart;
+        songKeyOriginal = songKey;
+      }
+
+      function transposeSong() {
+        const targetKey = document.getElementById("targetKey").value;
+
+        // Function to convert a Roman numeral back to a musical note in the target key
+        function convertFromRoman(romanNumeral, targetKey) {
+          const majorScale = {
+            C: ["C", "D", "E", "F", "G", "A", "B"],
+            Db: ["Db", "Eb", "F", "Gb", "Ab", "Bb", "C"],
+            D: ["D", "E", "F#", "G", "A", "B", "C#"],
+            Eb: ["Eb", "F", "G", "Ab", "Bb", "C", "D"],
+            E: ["E", "F#", "G#", "A", "B", "C#", "D#"],
+            F: ["F", "G", "A", "Bb", "C", "D", "E"],
+            Gb: ["Gb", "Ab", "Bb", "Cb", "Db", "Eb", "F"],
+            G: ["G", "A", "B", "C", "D", "E", "F#"],
+            Ab: ["Ab", "Bb", "C", "Db", "Eb", "F", "G"],
+            A: ["A", "B", "C#", "D", "E", "F#", "G#"],
+            Bb: ["Bb", "C", "D", "Eb", "F", "G", "A"],
+            B: ["B", "C#", "D#", "E", "F#", "G#", "A#"],
+          };
+
+          const keyScale = majorScale[targetKey];
+          const romanNumerals = ["I", "ii", "iii", "IV", "V", "vi", "vii(dim)"];
+          const numeralIndex = romanNumerals.indexOf(romanNumeral);
+          if (numeralIndex === -1) {
+            return romanNumeral;
+          }
+          return keyScale[numeralIndex];
+        }
+
+        // Replace the Roman numerals with musical notes in the target key
+        const convertedChart = songChartOriginal.replace(
+          /(?<!\w)(I|ii|iii|IV|V|vi|vii\(dim\))(\s+|-)/gim,
+          (match, romanNumeral, dash) => {
+            const note = convertFromRoman(romanNumeral, targetKey);
+            return note + dash;
+          }
+        );
+
+        document.getElementById("convertedChartResult").innerText =
+          convertedChart;
+      }
+    </script>
+  </body>
+</html>
