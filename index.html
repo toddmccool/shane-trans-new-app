@@ -4,20 +4,34 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Song Key and Roman Numeral Conversion</title>
+    <title>Chord Transposer</title>
+    <style>
+      body {
+        color: white;
+        background-image: url("shaneSitting.jpg");
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+      }
+    </style>
   </head>
 
   <body>
     <h1>Chord Chart Conversion</h1>
     <div>
-      <label for="songChart">Song Chart:</label>
+      <label for="songChart">enter your Song Chart here ↗ </label>
       <textarea id="songChart" rows="10" cols="50"></textarea>
     </div>
+    <br />
+    <br />
 
-    <button onclick="convertToRoman()">Convert to Roman</button>
+    <button onclick="convertToRoman()">1st, Convert to Roman Numerals</button>
 
     <div>
-      <label for="newKey">New Song Key:</label>
+      <br />
+
+      <label for="newKey">2nd, convert to Desired Song Key:</label>
       <select id="newKey">
         <option value="C">C</option>
         <option value="Db">Db</option>
@@ -33,9 +47,8 @@
         <option value="Bb">Bb</option>
         <option value="B">B</option>
       </select>
+      <button onclick="transposeSong()">Transpose Song</button>
     </div>
-
-    <button onclick="transposeSong()">Transpose Song</button>
 
     <div>
       <h2>Converted Chart:</h2>
