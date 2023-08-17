@@ -114,7 +114,7 @@
           return;
         }
 
-        const romanChart = processSongChart(songChart, originalKey, true);
+        const romanChart = convertToRomanNumerals(songChart, originalKey);
         document.getElementById("convertedChart").textContent = romanChart;
       }
 
@@ -124,6 +124,18 @@
         const newKey = document.getElementById("newKey").value;
         const transposedChart = processSongChart(romanChart, newKey, false);
         document.getElementById("convertedChart").textContent = transposedChart;
+      }
+
+      function convertToRomanNumerals(chart, songKey) {
+        var songKeyMap = songKeyConversion[songKey]; // <-- changed this line
+
+        return chart.replace(
+          /(?<=\s|-|^)([A-G](b|#)?)(?=\s|-|$)/g,
+          function (match, note) {
+            const index = songKeyMap.indexOf(note);
+            return ["I", "II", "III", "IV", "V", "VI", "VII"][index] || note;
+          }
+        );
       }
     </script>
   </body>
