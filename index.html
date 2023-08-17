@@ -82,20 +82,29 @@
         // Handle repeated notes first
         if (isRomanConversion) {
           songChart = songChart.replace(
-            /(?<=\s|-|^)([A-G](?:b|#)?)(-\1|\1-)(?=\s|-|\.|$)/g,
+            /(?<=\s|-|^)([A-G](?:b|#)?low?)(-\1|\1-)(?=\s|-|\.|$)/g,
             (match, note) => {
-              const index = originalKey.indexOf(note);
+              const baseNote = note.slice(
+                0,
+                note.endsWith("low") ? -3 : note.length
+              );
+              const index = originalKey.indexOf(baseNote);
+              const romanNumeral = ["I", "II", "III", "IV", "V", "VI", "VII"][
+                index
+              ];
               return (
-                ["I", "II", "III", "IV", "V", "VI", "VII"][index] +
+                romanNumeral +
+                (note.endsWith("low") ? "low" : "") +
                 "-" +
-                ["I", "II", "III", "IV", "V", "VI", "VII"][index]
+                romanNumeral +
+                (note.endsWith("low") ? "low" : "")
               );
             }
           );
         } else {
           songChart = songChart.replace(
-            /(?<=\s|-|^)(I|II|III|IV|V|VI|VII)(-\1|\1-)(?=\s|-|\.|$)/g,
-            (match, romanNumeral) => {
+            /(?<=\s|-|^)(I|II|III|IV|V|VI|VII)(low)?(-\1|\1-)(?=\s|-|\.|$)/g,
+            (match, romanNumeral, low) => {
               const romanToIndex = {
                 I: 0,
                 II: 1,
@@ -105,12 +114,8 @@
                 VI: 5,
                 VII: 6,
               };
-              const index = romanToIndex[romanNumeral];
-              return (
-                songKeyConversion[key][index] +
-                "-" +
-                songKeyConversion[key][index]
-              );
+              const note = originalKey[romanToIndex[romanNumeral]];
+              return note + (low || "") + "-" + note + (low || "");
             }
           );
         }
