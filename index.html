@@ -21,11 +21,14 @@
     <h1>Shane's Jesus Christ <i>(trans) </i>Pose App</h1>
     <div>
       <label for="songChart">enter your Song Chart here ↓</label><br />
+
+      <br />
+
       <textarea
         id="songChart"
         rows="10"
         cols="50"
-        placeholder="note: if you're copying directly from a .docx file and experiencing you may need to 1st convert it to a text file"
+        placeholder="note: if you're copying directly from a .docx file and experiencing problems you may need to 1st convert it to a text file - copy/paste from the chart into notes and then back into this app"
       ></textarea>
     </div>
     <br />
@@ -60,6 +63,8 @@
       <pre id="convertedChart"></pre>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
     <script>
       const songKeyConversion = {
         C: ["C", "D", "E", "F", "G", "A", "B"],
@@ -76,8 +81,9 @@
         B: ["B", "C#", "D#", "E", "F#", "G#", "A#"],
       };
 
-      function extractKey(songChart) {
-        const keyMatch = songChart.match(/Key\s*:\s*([A-G](?:b|#)?)/i);
+      function extractKey(content) {
+        if (!content) return null;
+        const keyMatch = content.match(/key:\s*([A-Ga-g][b#]?)/);
         return keyMatch ? keyMatch[1] : null;
       }
 
@@ -155,16 +161,23 @@
 
         return songChart;
       }
-
       function convertToRoman() {
-        const songChart = document.getElementById("songChart").value;
-        const originalKey = extractKey(songChart);
-        if (!originalKey) {
+        const songChart = document.getElementById("songChart");
+        let content = songChart.value;
+
+        if (!content) {
+          alert("Please provide content in the song chart.");
+          return;
+        }
+
+        let originalKey = extractKey(content);
+        if (!originalKey || !songKeyConversion[originalKey]) {
           alert("Unable to determine the song's original key.");
           return;
         }
 
-        const romanChart = convertToRomanNumerals(songChart, originalKey);
+        const romanChart = convertToRomanNumerals(songChart.value, originalKey);
+
         document.getElementById("convertedChart").textContent = romanChart;
       }
 
@@ -203,6 +216,44 @@
         );
 
         return chart;
+      }
+
+      function handleFile() {
+        const fileInput = document.getElementById("fileInput");
+        const file = fileInput.files[0];
+
+        if (file) {
+          convertDocxToText(file).then((text) => {
+            document.getElementById("songChart").value = text;
+          });
+        }
+      }
+
+      function convertDocxToText(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            const arrayBuffer = event.target.result;
+            mammoth
+              .convertToHtml({ arrayBuffer: arrayBuffer })
+              .then(displayResult)
+              .catch(handleError);
+          };
+          reader.readAsArrayBuffer(file);
+
+          function displayResult(result) {
+            // Convert HTML to plain text
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(result.value, "text/html");
+            const text = doc.body.textContent || "";
+            resolve(text);
+          }
+
+          function handleError(err) {
+            console.log(err);
+            reject(err);
+          }
+        });
       }
     </script>
   </body>
